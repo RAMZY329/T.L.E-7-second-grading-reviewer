@@ -109,6 +109,11 @@ function startCompetition() {
   const inputTime = parseInt(document.getElementById("comp-time-select").value);
   compTimeLeft = isNaN(inputTime) ? 60 : Math.max(10, inputTime);
 
+  // Reset question tracker for current topic to ensure fresh start
+  if (typeof resetQuestionTracker === 'function') {
+    resetQuestionTracker(currentTopic);
+  }
+
   // reset state
   playerScores = { 1: 0, 2: 0, 3: 0, 4: 0 };
   compProblems = { 1: [], 2: [], 3: [], 4: [] };

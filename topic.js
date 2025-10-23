@@ -1,5 +1,19 @@
 let currentTopic = "tle_quiz"; // default to TLE questions
 
+// Question tracking system to ensure all questions are answered before repetition
+let questionTrackers = {
+  tle_quiz: {
+    usedQuestions: [],
+    shuffledIndices: [],
+    currentIndex: 0
+  },
+  ap_long_quiz: {
+    usedQuestions: [],
+    shuffledIndices: [],
+    currentIndex: 0
+  }
+};
+
 // TLE Question Bank
 const TLEQuestionBank = [
   // Agricultural Jobs
@@ -222,8 +236,39 @@ const APQuestionBank = [
 
 // Add an AP MCQ problem generator so getProblem() can return AP items when currentTopic is set
 ProblemGenerator.ap_long_quiz = () => {
-  const idx = Math.floor(Math.random() * APQuestionBank.length);
-  const item = APQuestionBank[idx];
+  const tracker = questionTrackers.ap_long_quiz;
+  
+  // If all questions have been used, reset the tracker and create new shuffled order
+  if (tracker.usedQuestions.length >= APQuestionBank.length) {
+    tracker.usedQuestions = [];
+    tracker.currentIndex = 0;
+    // Create a new shuffled array of indices
+    tracker.shuffledIndices = Array.from({length: APQuestionBank.length}, (_, i) => i);
+    // Shuffle the indices using Fisher-Yates algorithm
+    for (let i = tracker.shuffledIndices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [tracker.shuffledIndices[i], tracker.shuffledIndices[j]] = [tracker.shuffledIndices[j], tracker.shuffledIndices[i]];
+    }
+  }
+  
+  // If shuffledIndices is empty (first time), create it
+  if (tracker.shuffledIndices.length === 0) {
+    tracker.shuffledIndices = Array.from({length: APQuestionBank.length}, (_, i) => i);
+    // Shuffle the indices using Fisher-Yates algorithm
+    for (let i = tracker.shuffledIndices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [tracker.shuffledIndices[i], tracker.shuffledIndices[j]] = [tracker.shuffledIndices[j], tracker.shuffledIndices[i]];
+    }
+  }
+  
+  // Get the next question using shuffled index
+  const questionIndex = tracker.shuffledIndices[tracker.currentIndex];
+  const item = APQuestionBank[questionIndex];
+  tracker.currentIndex++;
+  
+  // Mark this question as used
+  tracker.usedQuestions.push(item.id);
+  
   // Return a problem object with options and ans (letter)
   return {
     id: item.id,
@@ -235,8 +280,39 @@ ProblemGenerator.ap_long_quiz = () => {
 
 // Add a TLE MCQ problem generator
 ProblemGenerator.tle_quiz = () => {
-  const idx = Math.floor(Math.random() * TLEQuestionBank.length);
-  const item = TLEQuestionBank[idx];
+  const tracker = questionTrackers.tle_quiz;
+  
+  // If all questions have been used, reset the tracker and create new shuffled order
+  if (tracker.usedQuestions.length >= TLEQuestionBank.length) {
+    tracker.usedQuestions = [];
+    tracker.currentIndex = 0;
+    // Create a new shuffled array of indices
+    tracker.shuffledIndices = Array.from({length: TLEQuestionBank.length}, (_, i) => i);
+    // Shuffle the indices using Fisher-Yates algorithm
+    for (let i = tracker.shuffledIndices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [tracker.shuffledIndices[i], tracker.shuffledIndices[j]] = [tracker.shuffledIndices[j], tracker.shuffledIndices[i]];
+    }
+  }
+  
+  // If shuffledIndices is empty (first time), create it
+  if (tracker.shuffledIndices.length === 0) {
+    tracker.shuffledIndices = Array.from({length: TLEQuestionBank.length}, (_, i) => i);
+    // Shuffle the indices using Fisher-Yates algorithm
+    for (let i = tracker.shuffledIndices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [tracker.shuffledIndices[i], tracker.shuffledIndices[j]] = [tracker.shuffledIndices[j], tracker.shuffledIndices[i]];
+    }
+  }
+  
+  // Get the next question using shuffled index
+  const questionIndex = tracker.shuffledIndices[tracker.currentIndex];
+  const item = TLEQuestionBank[questionIndex];
+  tracker.currentIndex++;
+  
+  // Mark this question as used
+  tracker.usedQuestions.push(item.id);
+  
   // Return a problem object with options and ans (letter)
   return {
     id: item.id,
@@ -382,6 +458,22 @@ function loadTopic() {
     if (typeof initPractice === 'function') initPractice();
     // navigate to Practice via main.js if available
     try { document.getElementById('btn-practice').click(); } catch (e) {}
+  });
+}
+
+// Function to reset question tracking for a specific topic
+function resetQuestionTracker(topic) {
+  if (questionTrackers[topic]) {
+    questionTrackers[topic].usedQuestions = [];
+    questionTrackers[topic].currentIndex = 0;
+    questionTrackers[topic].shuffledIndices = [];
+  }
+}
+
+// Function to reset all question trackers
+function resetAllQuestionTrackers() {
+  Object.keys(questionTrackers).forEach(topic => {
+    resetQuestionTracker(topic);
   });
 }
 

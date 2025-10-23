@@ -98,6 +98,11 @@ function startPractice() {
   // Confirm before starting with more detailed message
   if (!confirm('Ready to start a 15-minute T.L.E. practice quiz?\n\nYou will be tested on:\n- Agricultural Jobs\n- Crop Maintenance\n- Waste Management\n\nClick OK to begin!')) return;
 
+  // Reset question tracker for current topic to ensure fresh start
+  if (typeof resetQuestionTracker === 'function') {
+    resetQuestionTracker(currentTopic);
+  }
+
   // Always start with fixed 15 minutes (900 seconds)
   timeLeft = 900;
   practiceScore = 0;
